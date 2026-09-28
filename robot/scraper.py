@@ -22,9 +22,13 @@ from rules import check_violations, check_qualified
 supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
 
 
+MT5_PATH = os.environ.get("MT5_PATH")  # ruta a terminal64.exe, localizada por el workflow
+
+
 def fetch_account_data(login: str, investor_password: str, server: str) -> dict:
     """Se conecta a una cuenta en modo solo-lectura y saca sus datos."""
-    if not mt5.initialize():
+    initialized = mt5.initialize(path=MT5_PATH) if MT5_PATH else mt5.initialize()
+    if not initialized:
         raise RuntimeError(f"No se pudo iniciar MT5: {mt5.last_error()}")
 
     authorized = mt5.login(int(login), password=investor_password, server=server)

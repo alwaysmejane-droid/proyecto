@@ -17,11 +17,25 @@ jobs:
 
       # Instala el terminal MT5 en el runner (necesario: la librería
       # MetaTrader5 se conecta al terminal local, no directo al broker).
-      # PENDIENTE DE PROBAR: puede necesitar ajustes la primera corrida.
       - name: Instalar terminal MT5
         run: |
           Invoke-WebRequest -Uri "https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe" -OutFile "mt5setup.exe"
           Start-Process -FilePath "mt5setup.exe" -ArgumentList "/auto" -Wait
+          Start-Sleep -Seconds 10
+
+      # Primera corrida mostró que Python no encuentra el terminal solo
+      # (error -10003 "not found"). Lo localizamos explícitamente y se lo
+      # pasamos por ruta directa en vez de dejar que la librería lo adivine.
+      - name: Ubicar terminal64.exe
+        id: find_terminal
+        run: |
+          $found = Get-ChildItem -Path "$env:ProgramFiles","$env:LOCALAPPDATA","$env:APPDATA" -Filter "terminal64.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($found) {
+            echo "MT5_PATH=$($found.FullName)" >> $env:GITHUB_ENV
+            Write-Host "Encontrado en: $($found.FullName)"
+          } else {
+            Write-Host "No se encontró terminal64.exe - revisar log de instalación"
+          }
 
       - run: pip install -r robot/requirements.txt
 
@@ -29,3 +43,4 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          MT5_PATH: ${{ env.MT5_PATH }}
