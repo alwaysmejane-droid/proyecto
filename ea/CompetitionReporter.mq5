@@ -6,7 +6,7 @@
 #property strict
 
 input string ReportUrl   = "https://giznhbantstjcksbjydg.supabase.co/functions/v1/rapid-endpoint"; // URL de la función
-input string ReportToken = "afb216a1d583edb28be0fba4cff94d36";  // token único por participante (cada quien pone el suyo)
+input string ReportToken = "PEGA_AQUI_TU_TOKEN";  // token único por participante (cada quien pone el suyo, NO subir el real a git)
 input string SupabaseAnonKey = "sb_publishable_C_9czjyd_ZTEG80rsFHL0Q_Z0to7IaX"; // clave pública de Supabase (misma para todos, segura de compartir)
 input int    IntervalMin = 15;                    // cada cuántos minutos reporta
 
