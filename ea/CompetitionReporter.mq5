@@ -57,10 +57,11 @@ void SendReport()
          tradingDays[daysFound++] = dayKey;
      }
 
+   string loginStr = IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN));
    string json = StringFormat(
-      "{\"login\":\"%d\",\"token\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,"
+      "{\"login\":\"%s\",\"token\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,"
       "\"trades_count\":%d,\"max_lot_used\":%.2f,\"trading_days\":%d}",
-      AccountInfoInteger(ACCOUNT_LOGIN), ReportToken, balance, equity,
+      loginStr, ReportToken, balance, equity,
       tradesCount, maxLot, daysFound
    );
 
