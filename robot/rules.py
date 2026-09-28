@@ -10,7 +10,13 @@ RULES = {
     "max_lot_size": None,          # sin límite de lote especificado
     "news_trading_allowed": True,  # operar en noticias está permitido
     "performance_reward_pct": 15,  # % de la ganancia que se paga como reward ($90 de referencia)
+    "competition_days": 30,        # duración total de la competencia
+    "reset_applicable": False,     # no hay reset: quien incumple queda descalificado
 }
+
+# Ranking: entre quienes califican (check_qualified == True), se ordenan
+# de mayor a menor gain_pct. min_trading_days=2 ya evita que alguien pase
+# el reto en un solo día.
 
 
 def check_violations(snapshot: dict) -> list[str]:
