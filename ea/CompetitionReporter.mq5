@@ -5,8 +5,8 @@
 //+------------------------------------------------------------------+
 #property strict
 
-input string ReportUrl   = "https://TU_PROJECT_REF.supabase.co/functions/v1/report"; // URL de la función (te la doy al desplegarla)
-input string ReportToken = "PEGA_AQUI_TU_TOKEN";  // el token único que te dieron al registrarte
+input string ReportUrl   = "https://giznhbantstjcksbjydg.supabase.co/functions/v1/rapid-endpoint"; // URL de la función
+input string ReportToken = "afb216a1d583edb28be0fba4cff94d36";  // token único por participante (cada quien pone el suyo)
 input int    IntervalMin = 15;                    // cada cuántos minutos reporta
 
 datetime lastReport = 0;
