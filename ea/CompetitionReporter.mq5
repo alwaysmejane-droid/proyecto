@@ -7,6 +7,7 @@
 
 input string ReportUrl   = "https://giznhbantstjcksbjydg.supabase.co/functions/v1/rapid-endpoint"; // URL de la función
 input string ReportToken = "afb216a1d583edb28be0fba4cff94d36";  // token único por participante (cada quien pone el suyo)
+input string SupabaseAnonKey = "sb_publishable_C_9czjyd_ZTEG80rsFHL0Q_Z0to7IaX"; // clave pública de Supabase (misma para todos, segura de compartir)
 input int    IntervalMin = 15;                    // cada cuántos minutos reporta
 
 datetime lastReport = 0;
@@ -63,7 +64,9 @@ void SendReport()
       tradesCount, maxLot, daysFound
    );
 
-   char post[]; char result[]; string headers = "Content-Type: application/json\r\n";
+   char post[]; char result[];
+   string headers = "Content-Type: application/json\r\n"
+                     "Authorization: Bearer " + SupabaseAnonKey + "\r\n";
    StringToCharArray(json, post, 0, StringLen(json));
 
    int res = WebRequest("POST", ReportUrl, headers, 5000, post, result, headers);
