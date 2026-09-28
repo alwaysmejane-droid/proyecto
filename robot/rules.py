@@ -1,11 +1,15 @@
-# ---- REGLAS DE LA COMPETENCIA (ajustar con los números reales) ----
+# ---- REGLAS DE LA COMPETENCIA ----
+# Cuenta de referencia: $5,000 (drawdown tipo "Static": siempre sobre el
+# balance inicial, no sobre el punto más alto alcanzado).
 RULES = {
-    "profit_target_pct": 10,       # % de ganancia para calificar
-    "max_daily_drawdown_pct": 5,   # % máximo de caída en un solo día
-    "max_total_drawdown_pct": 10,  # % máximo de caída desde el inicio
-    "min_trading_days": 5,         # días distintos operando, mínimo
-    "max_lot_size": 1.0,           # tamaño máximo de posición
-    "competition_days": 30,        # duración total en días
+    "starting_balance": 5000,
+    "profit_target_pct": 10,       # 10% ($600) para calificar
+    "max_daily_drawdown_pct": 3,   # 3% ($180) máximo de caída en un solo día
+    "max_total_drawdown_pct": 6,   # 6% ($360) máximo de caída, sobre balance inicial (static)
+    "min_trading_days": 2,         # días distintos operando, mínimo
+    "max_lot_size": None,          # sin límite de lote especificado
+    "news_trading_allowed": True,  # operar en noticias está permitido
+    "performance_reward_pct": 15,  # % de la ganancia que se paga como reward ($90 de referencia)
 }
 
 
@@ -25,7 +29,7 @@ def check_violations(snapshot: dict) -> list[str]:
             f"límite {RULES['max_total_drawdown_pct']}%"
         )
 
-    if snapshot["max_lot_used"] > RULES["max_lot_size"]:
+    if RULES["max_lot_size"] is not None and snapshot["max_lot_used"] > RULES["max_lot_size"]:
         violations.append(
             f"Lote {snapshot['max_lot_used']} > "
             f"límite {RULES['max_lot_size']}"
