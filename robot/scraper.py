@@ -27,11 +27,16 @@ MT5_PATH = os.environ.get("MT5_PATH")  # ruta a terminal64.exe, localizada por e
 
 def fetch_account_data(login: str, investor_password: str, server: str) -> dict:
     """Se conecta a una cuenta en modo solo-lectura y saca sus datos."""
-    initialized = mt5.initialize(path=MT5_PATH) if MT5_PATH else mt5.initialize()
+    kwargs = {"timeout": 60000}
+    if MT5_PATH:
+        kwargs["path"] = MT5_PATH
+    initialized = mt5.initialize(**kwargs)
     if not initialized:
         raise RuntimeError(f"No se pudo iniciar MT5: {mt5.last_error()}")
 
-    authorized = mt5.login(int(login), password=investor_password, server=server)
+    authorized = mt5.login(
+        int(login), password=investor_password, server=server, timeout=60000
+    )
     if not authorized:
         mt5.shutdown()
         raise RuntimeError(f"Login falló para {login}: {mt5.last_error()}")
