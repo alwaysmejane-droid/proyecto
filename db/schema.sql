@@ -1,18 +1,19 @@
 -- Tabla de participantes
--- login/server: público (identifican la cuenta). investor_password: de solo
--- lectura (no puede operar ni retirar) pero aun así se trata como dato
--- sensible: nunca se expone en el dashboard ni en logs.
+-- report_token: secreto único por participante, generado al registrarlo.
+-- Va dentro del EA que corre en su propia PC/VPS — nunca la clave de
+-- Supabase. Si se filtra, solo permite reportar datos falsos de ESA
+-- cuenta, nunca acceso a la base completa.
 create table if not exists participants (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   mt5_login text not null unique,
-  mt5_investor_password text not null,
   mt5_server text not null,
+  report_token text not null unique default encode(gen_random_bytes(16), 'hex'),
   starting_balance numeric not null,
   created_at timestamptz default now()
 );
 
--- Snapshot de cada lectura del robot (una fila por participante por corrida)
+-- Snapshot de cada reporte que manda el EA (una fila por envío)
 create table if not exists account_snapshots (
   id uuid primary key default gen_random_uuid(),
   participant_id uuid references participants(id),
