@@ -1,45 +1,58 @@
 """
-Robot de la competencia:
-1. Lee la lista de participantes desde Supabase.
-2. Para cada uno, entra a su página pública de Signal en MQL5 y saca los datos.
+Robot de la competencia (login directo a MT5):
+1. Lee la lista de participantes desde Supabase (login, investor password, servidor).
+2. Para cada uno: conecta al terminal MT5, entra con su contraseña de
+   inversor (solo lectura), saca los datos, se desconecta.
 3. Revisa las reglas (rules.py).
-4. Guarda el snapshot y el estado (activo/descalificado) en Supabase.
+4. Guarda el snapshot y el estado (activo/descalificado/calificado) en Supabase.
 
-Variables de entorno necesarias (se configuran como "Secrets" en GitHub):
+Requiere Windows + terminal MetaTrader 5 instalado (ver .github/workflows/robot.yml).
+
+Variables de entorno necesarias (Secrets en GitHub):
 - SUPABASE_URL
 - SUPABASE_KEY
 """
 
 import os
-import requests
-from bs4 import BeautifulSoup
+import time
+import MetaTrader5 as mt5
 from supabase import create_client
 from rules import check_violations, check_qualified
 
 supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
 
 
-def fetch_signal_data(signal_url: str) -> dict:
-    """Descarga y parsea la página pública de un Signal de MQL5."""
-    resp = requests.get(signal_url, timeout=15, headers={"User-Agent": "Mozilla/5.0"})
-    resp.raise_for_status()
-    soup = BeautifulSoup(resp.text, "html.parser")
+def fetch_account_data(login: str, investor_password: str, server: str) -> dict:
+    """Se conecta a una cuenta en modo solo-lectura y saca sus datos."""
+    if not mt5.initialize():
+        raise RuntimeError(f"No se pudo iniciar MT5: {mt5.last_error()}")
 
-    # NOTA: estos selectores hay que ajustarlos mirando el HTML real
-    # de una página de Signal antes de usarlo en producción.
-    def get_stat(label: str) -> str:
-        el = soup.find(string=label)
-        return el.find_next("span").text.strip() if el else "0"
+    authorized = mt5.login(int(login), password=investor_password, server=server)
+    if not authorized:
+        mt5.shutdown()
+        raise RuntimeError(f"Login falló para {login}: {mt5.last_error()}")
 
-    return {
-        "balance": float(get_stat("Balance").replace(",", "")),
-        "equity": float(get_stat("Equity").replace(",", "")),
-        "drawdown_pct": float(get_stat("Drawdown").replace("%", "")),
-        "daily_drawdown_pct": float(get_stat("Drawdown diario").replace("%", "")),
-        "trades_count": int(get_stat("Trades") or 0),
-        "max_lot_used": float(get_stat("Lote máximo") or 0),
-        "trading_days": int(get_stat("Días operando") or 0),
+    info = mt5.account_info()
+    deals = mt5.history_deals_get(0, int(time.time()))
+    deals = deals or []
+
+    trading_days = len({d.time // 86400 for d in deals if d.entry == 1})
+    lots = [d.volume for d in deals if d.volume]
+    max_lot_used = max(lots) if lots else 0
+
+    data = {
+        "balance": info.balance,
+        "equity": info.equity,
+        "trades_count": len([d for d in deals if d.entry == 1]),
+        "max_lot_used": max_lot_used,
+        "trading_days": trading_days,
+        # drawdown_pct / daily_drawdown_pct: requieren el historial de equity
+        # a lo largo del día/competencia; se calculan en process_snapshot()
+        # a partir de starting_balance por ahora (placeholder simple).
     }
+
+    mt5.shutdown()
+    return data
 
 
 def run():
@@ -47,15 +60,24 @@ def run():
 
     for p in participants:
         try:
-            data = fetch_signal_data(p["mql5_signal_url"])
+            data = fetch_account_data(
+                p["mt5_login"], p["mt5_investor_password"], p["mt5_server"]
+            )
         except Exception as e:
-            print(f"[ERROR] {p['name']}: no se pudo leer el signal ({e})")
+            print(f"[ERROR] {p['name']}: {e}")
             continue
 
-        gain_pct = round(
-            (data["balance"] - p["starting_balance"]) / p["starting_balance"] * 100, 2
-        )
-        snapshot = {**data, "participant_id": p["id"], "gain_pct": gain_pct}
+        starting = p["starting_balance"]
+        gain_pct = round((data["balance"] - starting) / starting * 100, 2)
+        drawdown_pct = round(max(0, (starting - data["equity"]) / starting * 100), 2)
+
+        snapshot = {
+            **data,
+            "participant_id": p["id"],
+            "gain_pct": gain_pct,
+            "drawdown_pct": drawdown_pct,
+            "daily_drawdown_pct": drawdown_pct,  # placeholder: ver nota abajo
+        }
 
         saved = supabase.table("account_snapshots").insert(snapshot).execute().data[0]
 
@@ -63,14 +85,11 @@ def run():
         qualified = check_qualified(snapshot)
 
         if violations:
-            status = "disqualified"
-            reason = "; ".join(violations)
+            status, reason = "disqualified", "; ".join(violations)
         elif qualified:
-            status = "qualified"
-            reason = None
+            status, reason = "qualified", None
         else:
-            status = "active"
-            reason = None
+            status, reason = "active", None
 
         supabase.table("participant_status").upsert({
             "participant_id": p["id"],
@@ -84,3 +103,9 @@ def run():
 
 if __name__ == "__main__":
     run()
+
+# NOTA sobre daily_drawdown_pct: para calcularlo bien (caída dentro de un
+# solo día, no acumulada) hace falta guardar el equity más alto del día en
+# curso y compararlo en cada corrida. Por ahora usa el mismo valor que el
+# drawdown total como placeholder — lo afinamos cuando probemos con datos
+# reales.
