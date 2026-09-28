@@ -3,68 +3,177 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Competencia Demo</title>
+<title>Proyecto Génesis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
 <style>
   :root {
-    --bg: #0f1115;
-    --surface: #171a21;
-    --border: #262b35;
-    --text: #eef0f4;
-    --muted: #8b93a3;
-    --accent: #4fd1a5;
-    --danger: #ef5b6f;
-    --warn: #f2b84b;
+    --bg: #0b0906;
+    --bg-2: #14100a;
+    --surface: #1b1610;
+    --surface-2: #221b12;
+    --border: #3a2f1d;
+    --gold: #d4af37;
+    --gold-bright: #f2cf6b;
+    --gold-dim: #8a7132;
+    --text: #f3ecd9;
+    --muted: #a89a7a;
+    --accent-pos: #6fcf97;
+    --accent-neg: #e0665f;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    padding: 24px 16px 48px;
-    background: var(--bg);
+    padding: 32px 16px 64px;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(212,175,55,0.10), transparent 60%),
+      linear-gradient(180deg, var(--bg-2), var(--bg) 40%);
     color: var(--text);
-    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: "Inter", -apple-system, "Segoe UI", sans-serif;
+    min-height: 100vh;
   }
-  .wrap { max-width: 900px; margin: 0 auto; }
-  h1 { font-size: 1.5rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); font-size: 0.9rem; margin: 0 0 24px; }
+  .wrap { max-width: 960px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 40px; }
+  .logo { width: 108px; height: 108px; border-radius: 50%; object-fit: cover; margin-bottom: 16px; box-shadow: 0 0 0 1px var(--gold-dim), 0 0 40px rgba(212,175,55,0.15); }
+  h1 {
+    font-family: "Cinzel", serif;
+    font-weight: 700;
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    letter-spacing: 0.06em;
+    margin: 0 0 6px;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold-dim));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .tagline {
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-value {
+    font-family: "Cinzel", serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gold-bright);
+  }
+  .stat-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-head h2 {
+    font-family: "Cinzel", serif;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0;
+  }
+  #updated { color: var(--muted); font-size: 0.78rem; margin: 0; }
+
   table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
-  th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
-  tr:hover td { background: var(--surface); }
-  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
-  .pill.active { background: #1e2a24; color: var(--accent); }
-  .pill.qualified { background: #1e2a24; color: var(--accent); }
-  .pill.disqualified { background: #2c1c20; color: var(--danger); }
-  .gain-pos { color: var(--accent); font-weight: 600; }
-  .gain-neg { color: var(--danger); font-weight: 600; }
-  .reason { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
-  .empty { color: var(--muted); text-align: center; padding: 40px 0; }
-  .rank { color: var(--muted); width: 28px; }
+  th, td { text-align: left; padding: 12px 20px; border-bottom: 1px solid var(--border); }
+  th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--surface-2);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(212,175,55,0.05); }
+
+  .rank { width: 36px; font-family: "Cinzel", serif; color: var(--gold); font-weight: 600; }
+  .rank.medal { font-size: 1.1rem; }
+
+  .pill { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em; }
+  .pill.active { background: rgba(111,207,151,0.12); color: var(--accent-pos); border: 1px solid rgba(111,207,151,0.3); }
+  .pill.qualified { background: rgba(212,175,55,0.14); color: var(--gold-bright); border: 1px solid rgba(212,175,55,0.35); }
+  .pill.disqualified { background: rgba(224,102,95,0.12); color: var(--accent-neg); border: 1px solid rgba(224,102,95,0.3); }
+
+  .gain-pos { color: var(--accent-pos); font-weight: 600; }
+  .gain-neg { color: var(--accent-neg); font-weight: 600; }
+  .reason { color: var(--muted); font-size: 0.76rem; margin-top: 3px; }
+  .empty { color: var(--muted); text-align: center; padding: 48px 20px; }
+
+  @media (max-width: 640px) {
+    th, td { padding: 10px 12px; }
+    th:nth-child(4), td:nth-child(4) { display: none; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Competencia Demo — Ranking</h1>
-  <p class="sub" id="updated">Cargando...</p>
-  <table>
-    <thead>
-      <tr>
-        <th class="rank">#</th>
-        <th>Participante</th>
-        <th>Ganancia</th>
-        <th>Drawdown</th>
-        <th>Trades</th>
-        <th>Días</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody id="rows"></tbody>
-  </table>
-  <div id="empty" class="empty" hidden>Aún no hay reportes. Esperando el primer envío del EA.</div>
+  <header>
+    <img class="logo" src="assets/logo.png" alt="Proyecto Génesis">
+    <h1>Proyecto Génesis</h1>
+    <p class="tagline">El cambio empieza contigo</p>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Ranking</h2>
+      <p id="updated">Cargando...</p>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="rank">#</th>
+          <th>Participante</th>
+          <th>Ganancia</th>
+          <th>Drawdown</th>
+          <th>Trades</th>
+          <th>Días</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div id="empty" class="empty" hidden>Aún no hay reportes. Esperando el primer envío del EA.</div>
+  </div>
 </div>
 
 <script>
 const SUPABASE_URL = "https://giznhbantstjcksbjydg.supabase.co";
 const ANON_KEY = "sb_publishable_C_9czjyd_ZTEG80rsFHL0Q_Z0to7IaX";
+const MEDALS = ["🥇", "🥈", "🥉"];
 
 async function load() {
   try {
@@ -74,7 +183,7 @@ async function load() {
     const rows = await res.json();
     render(rows);
   } catch (e) {
-    document.getElementById("updated").textContent = "Error cargando datos: " + e.message;
+    document.getElementById("updated").textContent = "Error cargando datos";
   }
 }
 
@@ -84,6 +193,8 @@ function render(rows) {
   tbody.innerHTML = "";
 
   const withData = rows.filter((r) => r.fetched_at);
+  renderStats(rows, withData);
+
   if (!withData.length) {
     empty.hidden = false;
     document.getElementById("updated").textContent = "";
@@ -94,8 +205,9 @@ function render(rows) {
   withData.forEach((r, i) => {
     const tr = document.createElement("tr");
     const gainClass = r.gain_pct >= 0 ? "gain-pos" : "gain-neg";
+    const rankDisplay = MEDALS[i] ? `<span class="rank medal">${MEDALS[i]}</span>` : `<span class="rank">${i + 1}</span>`;
     tr.innerHTML = `
-      <td class="rank">${i + 1}</td>
+      <td>${rankDisplay}</td>
       <td>${r.name}</td>
       <td class="${gainClass}">${r.gain_pct?.toFixed(2)}%</td>
       <td>${r.drawdown_pct?.toFixed(2)}%</td>
@@ -110,7 +222,26 @@ function render(rows) {
   });
 
   document.getElementById("updated").textContent =
-    "Última actualización: " + new Date().toLocaleTimeString();
+    "Actualizado " + new Date().toLocaleTimeString();
+}
+
+function renderStats(all, withData) {
+  const qualified = withData.filter((r) => r.status === "qualified").length;
+  const disqualified = withData.filter((r) => r.status === "disqualified").length;
+  const active = withData.filter((r) => r.status === "active").length;
+  const leader = withData[0];
+
+  const stats = [
+    { label: "Participantes", value: all.length },
+    { label: "Activos", value: active },
+    { label: "Calificados", value: qualified },
+    { label: "Descalificados", value: disqualified },
+    { label: "Líder", value: leader ? `${leader.gain_pct?.toFixed(1)}%` : "—" },
+  ];
+
+  document.getElementById("stats").innerHTML = stats
+    .map((s) => `<div class="stat-card"><div class="stat-value">${s.value}</div><div class="stat-label">${s.label}</div></div>`)
+    .join("");
 }
 
 function label(status) {
@@ -118,7 +249,7 @@ function label(status) {
 }
 
 load();
-setInterval(load, 30000); // refresca cada 30s
+setInterval(load, 30000);
 </script>
 </body>
 </html>
