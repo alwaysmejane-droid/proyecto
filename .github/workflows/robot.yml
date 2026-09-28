@@ -1,0 +1,31 @@
+name: Robot de la competencia
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # cada 15 minutos
+  workflow_dispatch:          # permite correrlo manualmente también
+
+jobs:
+  run-robot:
+    runs-on: windows-latest   # MetaTrader5 solo corre en Windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Instala el terminal MT5 en el runner (necesario: la librería
+      # MetaTrader5 se conecta al terminal local, no directo al broker).
+      # PENDIENTE DE PROBAR: puede necesitar ajustes la primera corrida.
+      - name: Instalar terminal MT5
+        run: |
+          Invoke-WebRequest -Uri "https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe" -OutFile "mt5setup.exe"
+          Start-Process -FilePath "mt5setup.exe" -ArgumentList "/auto" -Wait
+
+      - run: pip install -r robot/requirements.txt
+
+      - run: python robot/scraper.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
