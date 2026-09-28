@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => null);
   if (!body) return new Response("Invalid JSON", { status: 400 });
 
-  const { login, token, balance, equity, trades_count, max_lot_used, trading_days } = body;
+  const { login, token, balance, equity, trades_count, max_lot_used, trading_days, symbols_traded } = body;
   if (!login || !token) {
     return new Response("Missing login/token", { status: 400 });
   }
@@ -57,6 +57,7 @@ Deno.serve(async (req) => {
     max_lot_used,
     trading_days,
     gain_pct,
+    symbols_traded: symbols_traded || null,
   };
 
   const { data: saved, error: sErr } = await supabase

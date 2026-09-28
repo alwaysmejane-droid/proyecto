@@ -10,6 +10,7 @@ select
   s.drawdown_pct,
   s.trades_count,
   s.trading_days,
+  s.symbols_traded,
   s.fetched_at,
   coalesce(ps.status, 'active') as status,
   ps.disqualified_reason

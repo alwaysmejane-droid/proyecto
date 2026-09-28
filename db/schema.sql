@@ -25,6 +25,7 @@ create table if not exists account_snapshots (
   max_lot_used numeric not null,
   trading_days integer not null,
   gain_pct numeric not null,
+  symbols_traded text, -- ej. "EURUSD, XAUUSD, GBPJPY"
   fetched_at timestamptz default now()
 );
 

@@ -35,6 +35,8 @@ void SendReport()
    double maxLot = 0;
    int tradingDays[32];
    int daysFound = 0;
+   string symbols[16];
+   int symbolsFound = 0;
 
    HistorySelect(0, TimeCurrent());
    int total = HistoryDealsTotal();
@@ -55,14 +57,28 @@ void SendReport()
          if(tradingDays[d] == dayKey) { found = true; break; }
       if(!found && daysFound < 32)
          tradingDays[daysFound++] = dayKey;
+
+      string sym = HistoryDealGetString(ticket, DEAL_SYMBOL);
+      if(sym != "")
+        {
+         bool symFound = false;
+         for(int s = 0; s < symbolsFound; s++)
+            if(symbols[s] == sym) { symFound = true; break; }
+         if(!symFound && symbolsFound < 16)
+            symbols[symbolsFound++] = sym;
+        }
      }
+
+   string symbolsStr = "";
+   for(int s = 0; s < symbolsFound; s++)
+      symbolsStr += (s > 0 ? ", " : "") + symbols[s];
 
    string loginStr = IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN));
    string json = StringFormat(
       "{\"login\":\"%s\",\"token\":\"%s\",\"balance\":%.2f,\"equity\":%.2f,"
-      "\"trades_count\":%d,\"max_lot_used\":%.2f,\"trading_days\":%d}",
+      "\"trades_count\":%d,\"max_lot_used\":%.2f,\"trading_days\":%d,\"symbols_traded\":\"%s\"}",
       loginStr, ReportToken, balance, equity,
-      tradesCount, maxLot, daysFound
+      tradesCount, maxLot, daysFound, symbolsStr
    );
 
    char post[]; char result[];
